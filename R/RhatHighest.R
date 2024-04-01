@@ -7,7 +7,7 @@
 #'
 #' @examples
 # Function to grab and plot any terms that haven't converged (rhat >= 1.1) or the highest rhat in a category. Quick glimpse at potential problem terms.
-RhatHighest = function(parameter) {
+RhatHighest = function(parameter, Colors = 1:out$n.chains) {
   # Create names and indices
   # Add .samples to the end to be able to grab the mcmc chains and every iteration
   samples = paste0(parameter, '.samples')
@@ -37,7 +37,7 @@ RhatHighest = function(parameter) {
         } # cc == 1
         if (cc != 1) {
           lines(as.mcmc(out[[samplesindex]][iters, out$rhat[[rhatindex]] >= 1.1][,rr]),
-                col = cc)
+                col = Colors[cc])
         } # cc != 1
 
       } # cc
@@ -62,7 +62,7 @@ RhatHighest = function(parameter) {
         traceplot(Chain, main = paste(Names, '; \nRhat = ', Rhat %>% round(3)))
       }
       if (cc != 1) {
-        lines(Chain, col = cc)
+        lines(Chain, col = Colors[cc])
       }
     }
 
