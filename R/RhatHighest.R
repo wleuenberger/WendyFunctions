@@ -24,8 +24,27 @@ RhatHighest = function(parameter) {
     Rhat = out$rhat[[rhatindex]][out$rhat[[rhatindex]] >= 1.1]
     print(tibble(Names, Rhat))
     # Make the traceplot
-    traceplot(out[[samplesindex]][, out$rhat[[rhatindex]] >= 1.1])
+    # traceplot(as.mcmc(out[[samplesindex]][, out$rhat[[rhatindex]] >= 1.1]))
+
+    for (rr in 1:length(Names)) {
+      for (cc in 1:out$n.chains) {
+        iters <- (((cc - 1) * out$n.post) + 1):(cc * out$n.post)
+        # Chain <- as.mcmc(out[[samplesindex]][iters, out$rhat[[rhatindex]] == max(out$rhat[[rhatindex]])])
+        if (cc == 1) {
+          traceplot(
+            as.mcmc(out[[samplesindex]][iters, out$rhat[[rhatindex]] >= 1.1][,rr]),
+            main = paste(Names[rr], ' \n Rhat = ', Rhat[rr] %>% round(3)))
+        } # cc == 1
+        if (cc != 1) {
+          lines(as.mcmc(out[[samplesindex]][iters, out$rhat[[rhatindex]] >= 1.1][,rr]),
+                col = cc)
+        } # cc != 1
+
+      } # cc
+    } # rr
+
   } else {
+
     # If everything has converged, grab the highest rhat to still get a glimpse
     print('beta with highest rhat (< 1.1)')
     # Grab the parameter names and rhat's to display nicely
@@ -40,7 +59,7 @@ RhatHighest = function(parameter) {
       iters <- (((cc - 1) * out$n.post) + 1):(cc * out$n.post)
       Chain <- as.mcmc(out[[samplesindex]][iters, out$rhat[[rhatindex]] == max(out$rhat[[rhatindex]])])
       if (cc == 1) {
-        traceplot(Chain)
+        traceplot(Chain, main = paste(Names, '; \nRhat = ', Rhat %>% round(3)))
       }
       if (cc != 1) {
         lines(Chain, col = cc)
