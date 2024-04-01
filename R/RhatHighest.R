@@ -7,7 +7,7 @@
 #'
 #' @examples
 # Function to grab and plot any terms that haven't converged (rhat >= 1.1) or the highest rhat in a category. Quick glimpse at potential problem terms.
-RhatHighest = function(parameter){
+RhatHighest = function(parameter) {
   # Create names and indices
   # Add .samples to the end to be able to grab the mcmc chains and every iteration
   samples = paste0(parameter, '.samples')
@@ -16,7 +16,7 @@ RhatHighest = function(parameter){
   # Index the rhat values
   rhatindex = which(names(out$rhat) == parameter)
   # Test if there are terms that haven't converged
-  if(any(out$rhat[[rhatindex]] > 1.1)){
+  if (any(out$rhat[[rhatindex]] > 1.1)) {
     # Keep track
     print('params with rhats >= 1.1')
     # Grab the parameter names and rhat's to display nicely
@@ -24,17 +24,28 @@ RhatHighest = function(parameter){
     Rhat = out$rhat[[rhatindex]][out$rhat[[rhatindex]] >= 1.1]
     print(tibble(Names, Rhat))
     # Make the traceplot
-    traceplot(out[[samplesindex]][,out$rhat[[rhatindex]] >= 1.1])
+    traceplot(out[[samplesindex]][, out$rhat[[rhatindex]] >= 1.1])
   } else {
     # If everything has converged, grab the highest rhat to still get a glimpse
     print('beta with highest rhat (< 1.1)')
     # Grab the parameter names and rhat's to display nicely
-    Names = dimnames(out[[samplesindex]])[[2]][
-      out$rhat[[rhatindex]] == max(out$rhat[[rhatindex]])
-    ]
+    Names = dimnames(out[[samplesindex]])[[2]][out$rhat[[rhatindex]] == max(out$rhat[[rhatindex]])]
     Rhat = out$rhat[[rhatindex]][out$rhat[[rhatindex]] == max(out$rhat[[rhatindex]])]
     print(tibble(Names, Rhat))
     # Make the traceplot
-    traceplot(out[[samplesindex]][,out$rhat[[rhatindex]] == max(out$rhat[[rhatindex]])])
+    # Chains concatenated one after another
+    # traceplot(out[[samplesindex]][,out$rhat[[rhatindex]] == max(out$rhat[[rhatindex]])])
+    # Chains on top of one another
+    for (cc in 1:out$n.chains) {
+      iters <- (((cc - 1) * out$n.post) + 1):(cc * out$n.post)
+      Chain <- as.mcmc(out[[samplesindex]][iters, out$rhat[[rhatindex]] == max(out$rhat[[rhatindex]])])
+      if (cc == 1) {
+        traceplot(Chain)
+      }
+      if (cc != 1) {
+        lines(Chain, col = cc)
+      }
+    }
+
   }
 }
