@@ -27,16 +27,22 @@ RhatHighest = function(parameter, Colors = 1:out$n.chains) {
     # traceplot(as.mcmc(out[[samplesindex]][, out$rhat[[rhatindex]] >= 1.1]))
 
     for (rr in 1:length(Names)) {
+      # Pull out the columns of data with rhats > 1.1
+      Above1.1 <- out[[samplesindex]][ , out$rhat[[rhatindex]] > 1.1]
+      if(length(Names) != 1){
+        # Use different indexing if there's multiple terms with rhats > 1.1
+        Above1.1 <- out[[samplesindex]][ , out$rhat[[rhatindex]] > 1.1][,rr]
+      }
       for (cc in 1:out$n.chains) {
         iters <- (((cc - 1) * out$n.post) + 1):(cc * out$n.post)
         # Chain <- as.mcmc(out[[samplesindex]][iters, out$rhat[[rhatindex]] == max(out$rhat[[rhatindex]])])
         if (cc == 1) {
           traceplot(
-            as.mcmc(out[[samplesindex]][iters, out$rhat[[rhatindex]] >= 1.1][,rr]),
-            main = paste(Names[rr], ' \n Rhat = ', Rhat[rr] %>% round(3)))
+            as.mcmc(Above1.1[iters]),
+            main = paste0(Names[rr], ' \n Rhat = ', Rhat[rr] %>% round(3)))
         } # cc == 1
         if (cc != 1) {
-          lines(as.mcmc(out[[samplesindex]][iters, out$rhat[[rhatindex]] >= 1.1][,rr]),
+          lines(Above1.1[iters],
                 col = Colors[cc])
         } # cc != 1
 
@@ -59,7 +65,7 @@ RhatHighest = function(parameter, Colors = 1:out$n.chains) {
       iters <- (((cc - 1) * out$n.post) + 1):(cc * out$n.post)
       Chain <- as.mcmc(out[[samplesindex]][iters, out$rhat[[rhatindex]] == max(out$rhat[[rhatindex]])])
       if (cc == 1) {
-        traceplot(Chain, main = paste(Names, '; \nRhat = ', Rhat %>% round(3)))
+        traceplot(Chain, main = paste0(Names, '; \nRhat = ', Rhat %>% round(3)))
       }
       if (cc != 1) {
         lines(Chain, col = Colors[cc])
