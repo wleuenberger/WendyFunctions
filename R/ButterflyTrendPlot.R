@@ -122,7 +122,7 @@ ButterflyTrendPlot <- function (
     print(my.plot)
     dev.off()
   } else {
-    print(my.plot)
+    # print(my.plot)
   }# save figure
 
 
