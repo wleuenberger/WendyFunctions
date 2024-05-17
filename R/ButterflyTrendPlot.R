@@ -21,8 +21,10 @@ ButterflyTrendPlot <- function (
   post.hoc.df <- data.frame(trend.est = NA,
                             int.est = NA,
                             trend.prob.pos = NA,
-                            trend.low = NA,
-                            trend.high = NA)
+                            trend.025 = NA,
+                            trend.25 = NA,
+                            trend.75 = NA,
+                            trend.975 = NA)
   # Save results and generate summary figure
   # Calculate the probability that the trend over time is positive
   prob.pos <- apply(Model$beta.samples, 2, function(a) mean(a > 0))
@@ -33,30 +35,32 @@ ButterflyTrendPlot <- function (
     # These are quantiles of the Data (which was model output from original),
     # Not from the model output of the mean. Therefore, they are much wider than
     # the mean trend
-    sum.indx.log.quants <- apply(log(Data), 3, quantile, probs = c(0.025, 0.5, 0.975))
+    sum.indx.log.quants <- apply(log(Data), 3, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
     # Calculate quantiles of the intercept and slope terms. Median and 95% CI
     # On real scale
-    beta.quants <- apply(exp(Model$beta.samples), 2, quantile, probs = c(0.025, 0.5, 0.975))
+    beta.quants <- apply(exp(Model$beta.samples), 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
     # On log scale
-    beta.log.quants <- apply(Model$beta.samples, 2, quantile, probs = c(0.025, 0.5, 0.975))
+    beta.log.quants <- apply(Model$beta.samples, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
   } else {
     # These are quantiles of the Data (which was model output from original),
     # Not from the model output of the mean. Therefore, they are much wider than
     # the mean trend
     # Keep the log name for simplicity later
-    sum.indx.log.quants <- apply(Data, 3, quantile, probs = c(0.025, 0.5, 0.975))
+    sum.indx.log.quants <- apply(Data, 3, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
     # Calculate quantiles of the intercept and slope terms. Median and 95% CI
     # On real scale
-    beta.quants <- apply(Model$beta.samples, 2, quantile, probs = c(0.025, 0.5, 0.975))
+    beta.quants <- apply(Model$beta.samples, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
     # Also on the real scale, but keep the log name
-    beta.log.quants <- apply(Model$beta.samples, 2, quantile, probs = c(0.025, 0.5, 0.975))
+    beta.log.quants <- apply(Model$beta.samples, 2, quantile, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
   } # if else logged
 
   # Fill in the rest of the post.hoc.df summary
-  post.hoc.df$trend.est <- beta.log.quants[2, 2]
-  post.hoc.df$int.est <- beta.log.quants[2, 1]
-  post.hoc.df$trend.low <- beta.log.quants[1, 2]
-  post.hoc.df$trend.high <- beta.log.quants[3, 2]
+  post.hoc.df$trend.est <- beta.log.quants[3, 2]
+  post.hoc.df$int.est <- beta.log.quants[3, 1]
+  post.hoc.df$trend.025 <- beta.log.quants[1, 2]
+  post.hoc.df$trend.25 <- beta.log.quants[2, 2]
+  post.hoc.df$trend.75 <- beta.log.quants[4, 2]
+  post.hoc.df$trend.975 <- beta.log.quants[5, 2]
 
   unique.years <- unique(Model$X[, 'years'])
   plot.min <- min(sum.indx.log.quants)
