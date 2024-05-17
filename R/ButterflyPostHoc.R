@@ -29,7 +29,7 @@ ButterflyPostHoc <- function( Data, Logged = TRUE, YearSplit = FALSE) {
   years <- rep(1:n.years, each = J)
   # Put a breakpoint halfway through
   if(YearSplit == TRUE) {
-    yearsplit <- tibble(years_raw = years)
+    Yearsplit <- tibble(years_raw = years)
     Yearsplit %<>%
       mutate(yearsplit = case_when(
         years_raw <= n.years/2 ~ paste0('1:', n.years/2),
