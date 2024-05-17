@@ -30,14 +30,14 @@ ButterflyPostHoc <- function( Data, Logged = TRUE, YearSplit = FALSE) {
   # Put a breakpoint halfway through
   if(YearSplit == TRUE) {
     Yearsplit <- tibble(years_raw = years)
-    Yearsplit %<>%
+    Yearsplit  <- Yearsplit
       mutate(yearsplit = case_when(
         years_raw <= n.years/2 ~ paste0('1:', n.years/2),
         years_raw > n.years/2 ~ paste0((n.years/2) + 1, ':', n.years)
       ),
       years = ifelse(years_raw <= n.years/2, years_raw, years_raw - n.years/2)
       )
-  }
+  } # YearSplit == TRUE
   sites <- rep(1:J, times = n.years)
   # Format data for postHocLM
   y <- matrix(Data, nrow = n.samples, ncol = J * n.years)
