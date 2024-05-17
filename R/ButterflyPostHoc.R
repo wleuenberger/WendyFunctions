@@ -7,7 +7,7 @@
 #' @export
 #'
 #' @examples
-ButterflyPostHoc <- function( Data, Logged = TRUE) {
+ButterflyPostHoc <- function( Data, Logged = TRUE, YearSplit = FALSE) {
   if( any(dim(Data) == c(1000, 262, 32)) == FALSE ) {
     stop(
       paste0('Different dimensions than expected. Expected c(1000, 262, 32).
@@ -27,19 +27,46 @@ ButterflyPostHoc <- function( Data, Logged = TRUE) {
   plot.years <- unique.years
   # Repeat data to change into 2D
   years <- rep(1:n.years, each = J)
+  # Put a breakpoint halfway through
+  if(YearSplit == TRUE) {
+    yearsplit <- tibble(years_raw = years)
+    Yearsplit %<>%
+      mutate(yearsplit = case_when(
+        years_raw <= n.years/2 ~ paste0('1:', n.years/2),
+        years_raw > n.years/2 ~ paste0((n.years/2) + 1, ':', n.years)
+      ),
+      years = ifelse(years_raw <= n.years/2, years_raw, years_raw - n.years/2)
+      )
+  }
   sites <- rep(1:J, times = n.years)
   # Format data for postHocLM
   y <- matrix(Data, nrow = n.samples, ncol = J * n.years)
+  if(YearSplit == TRUE){
+    covs <- data.frame(years = Yearsplit$years,
+                       sites,
+                       yearsplit = Yearsplit$yearsplit)
+  } else {
+    covs <- data.frame(years, sites)
+  }
+
   if (Logged == TRUE) {
     new.data.list <- list(y = log(y),
-                          covs = data.frame(years, sites))
+                          covs = covs)
   } else {
     new.data.list <- list(y = y,
-                          covs = data.frame(years, sites))
+                          covs = covs)
   }
-  out.posthoc <- postHocLM(formula = ~ years + (1 | sites),
-                           data = new.data.list,
-                           n.chains = 1,
-                           verbose = TRUE)
+
+  if( YearSplit == TRUE) {
+    out.posthoc <- postHocLM(formula = ~ years * yearsplit + (1 | sites),
+                             data = new.data.list,
+                             n.chains = 1,
+                             verbose = TRUE)
+  } else {
+    out.posthoc <- postHocLM(formula = ~ years + (1 | sites),
+                               data = new.data.list,
+                               n.chains = 1,
+                               verbose = TRUE)
+  }
   return(out.posthoc)
 } # ButterflyPostHoc function end
