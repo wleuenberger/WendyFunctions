@@ -40,9 +40,12 @@ ButterflyPostHoc <- function( Data, Logged = TRUE) {
                           covs = covs)
   }
 
-    out.posthoc <- postHocLM(formula = ~ years + (1 | sites),
-                               data = new.data.list,
-                               n.chains = 1,
-                               verbose = TRUE)
-  return(out.posthoc)
+  out.posthoc <- postHocLM(
+    formula = ~ years + (1 | sites),
+    data = new.data.list,
+    n.chains = 1,
+    verbose = TRUE
+  )
+  return(list(ModelOutput = out.posthoc,
+              BetaYears = out.posthoc$beta.samples[,"years"]))
 } # ButterflyPostHoc function end
