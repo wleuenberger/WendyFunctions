@@ -12,7 +12,10 @@
 #'
 #'
 FigSize <- function(OriginalWidth, OriginalHeight, OutputWidth = 200){
+  # Calculate the ratio between the desired output width and the original width
   WidthRatio <- OutputWidth / OriginalWidth
+  # Apply that width ratio to the height to calculate the output height
   OutputHeight <- OriginalHeight * WidthRatio
+  # Print the width and height nicely
   cat(paste0('Width = ', round(OutputWidth), '\nHeight = ', round(OutputHeight)))
 }
