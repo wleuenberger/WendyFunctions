@@ -47,9 +47,7 @@ ButterflyComparePostHoc <- function(
   MeanResults <- postHocLM(formula = ~ Group - 1,
                            data = new.data.list, n.chains = 1,
                            verbose = TRUE)
-  ReturnList <- list('Data' = new.data.list,
-                     'Compared' = ComparedResults,
-                     'Mean' = MeanResults)
+
   cat('\n************************************** \n\n',
       WhichLists,
       '\nEffects parameterization
@@ -105,7 +103,32 @@ ButterflyComparePostHoc <- function(
         trend.75 = beta.quants[4, 2],
         trend.975 = beta.quants[5, 2]
       )
-  } # WhicLists == 2
+    # WhichLists == 2 ends
+  } else {
+    Listdf <- tibble(One = 1:length(WhichLists),
+                     Two = 1:length(WhichLists)) %>%
+      expand.grid %>%
+      filter(One > Two)
+    ListBetas <- MeanResults$beta.samples
+    for( n.compare in 1:nrow(Listdf) ){
+      Compared <- ListBetas[,Listdf[n.compare, 1]] %>%
+        subtract(ListBetas[,Listdf[n.compare, 2]])
+      beta.quants <- quantile(Compared,
+                                  probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
+      post.hoc.df %<>%
+        add_row(Name = paste(WhichLists[Listdf[n.compare, 1]],
+                             '-',
+                             WhichLists[Listdf[n.compare, 2]]),
+                trend.prob.pos = mean(Compared > 0),
+                trend.est = beta.quants[3],
+                trend.025 = beta.quants[1],
+                trend.25 = beta.quants[2],
+                trend.75 = beta.quants[4],
+                trend.975 = beta.quants[5]
+        )
+    } # n.compare
+  } # WhichLists != 2
+
 
   ReturnList <- list('Data' = new.data.list,
                      'Compared' = ComparedResults,
