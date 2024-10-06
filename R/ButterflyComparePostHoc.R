@@ -17,6 +17,8 @@ ButterflyComparePostHoc <- function(
     WhichLists,
     NColumns = 136 # Shouldn't need to change, but in case we're not using the full set of species
 ) {
+  # order the WhichLists alphabetically to make sure output comes out correctly
+  WhichLists <- WhichLists %>% sort
   NGroups <- length(WhichLists)
   ThisList <- vector('list', length = NGroups)
   SppList <- vector('list', length = NGroups)
